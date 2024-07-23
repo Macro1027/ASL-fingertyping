@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
+from constants import LABELS
 
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, padding=1),
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),  # Change input channels to 3
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
@@ -13,10 +14,10 @@ class CNN(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.classifier = nn.Sequential(
-            nn.Linear(64 * 7 * 7, 128),
+            nn.Linear(64 * 50 * 50, 128),  # Adjust input size based on the output of conv layers
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.5),
-            nn.Linear(128, 25)  # 25 classes for A-Z excluding J
+            nn.Linear(128, len(LABELS))  # 25 classes for A-Z excluding J
         )
 
     def forward(self, x):

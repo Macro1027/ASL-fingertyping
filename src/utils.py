@@ -26,7 +26,7 @@ class SignLanguageMNISTDataset(Dataset):
 
     def __getitem__(self, idx):
         label = self.data.iloc[idx, 0]
-        image = np.array([self.data.iloc[idx, 1:].values.reshape(224, 224)])
+        image = np.array([self.data.iloc[idx, 1:].values.reshape(200, 200)])
         image = torch.tensor(image, dtype=torch.float32) / 255
 
         if self.transform:
@@ -45,7 +45,7 @@ greyscale_transform = v2.Compose([
 ])
 
 train_transform = v2.Compose([
-    v2.RandomResizedCrop(size=(224, 224), scale=(0.8, 1.0)),  # Randomly crop and resize
+    v2.RandomResizedCrop(size=(200, 200), scale=(0.8, 1.0)),  # Randomly crop and resize
     v2.RandomHorizontalFlip(p=0.5),  # Randomly flip horizontally
     v2.RandomRotation(degrees=15),  # Randomly rotate
     v2.ToTensor(),
