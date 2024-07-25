@@ -55,7 +55,7 @@ def initialize_model(device, learning_rate):
     - criterion: The loss function.
     - optimizer: The optimizer.
     """
-    model = CNN()
+    model = CNN(3, len(LABELS))
     model = model.to(device)  # Move the model to the specified device
     criterion = nn.CrossEntropyLoss()  # Define the loss function
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)  # Define the optimizer
