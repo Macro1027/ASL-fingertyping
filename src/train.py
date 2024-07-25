@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision.models import vgg19, VGG19_Weights
 from torchvision.datasets import ImageFolder
 from tqdm import tqdm
 
@@ -10,7 +9,7 @@ from model import CNN, LSTMModel
 from plots import plot_learning_curve
 from constants import *
 
-def train_model(dataset_path, dataset_url, num_epochs=10, batch_size=32, learning_rate=0.001):
+def train_model(dataset_path, dataset_url, num_epochs=10, batch_size=64, learning_rate=0.001):
     """
     Train the model with the given dataset.
 
@@ -23,9 +22,10 @@ def train_model(dataset_path, dataset_url, num_epochs=10, batch_size=32, learnin
     """
     # Determine the device to use (GPU if available, otherwise CPU)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using {device}.")
 
     # Download the dataset if not found
-    download_dataset(dataset_url, dataset_path)
+    # download_dataset(dataset_url, dataset_path)
 
     # Prepare data loaders for training and validation
     train_loader, val_loader = image_to_dataloaders(f'{dataset_path}/asl_alphabet_train/asl_alphabet_train', batch_size)
@@ -201,4 +201,4 @@ def test_model(model, test_loader, criterion, device):
     print(f"Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%")
 
 if __name__ == "__main__":
-    train_model(DATASET_PATH, DATASET_URL, num_epochs=25)
+    train_model(DATASET_PATH, DATASET_URL, num_epochs=100)

@@ -40,7 +40,8 @@ class SignLanguageMNISTDataset(Dataset):
 
 greyscale_transform = v2.Compose([
     v2.Grayscale(num_output_channels=1),  # Convert to grayscale
-    v2.ToTensor(),  # Convert the image to a tensor and scale to [0, 1]
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),  # Convert the image to a tensor and scale to [0, 1]
     v2.Normalize((0.5,), (0.5,))  # Normalize the image to [-1, 1]
 ])
 
@@ -48,37 +49,41 @@ train_transform = v2.Compose([
     v2.RandomResizedCrop(size=(200, 200), scale=(0.8, 1.0)),  # Randomly crop and resize
     v2.RandomHorizontalFlip(p=0.5),  # Randomly flip horizontally
     v2.RandomRotation(degrees=15),  # Randomly rotate
-    v2.ToTensor(),
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),
     v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 test_transform = v2.Compose([
-    v2.ToTensor(),
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),
     v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 # Download kaggle sign language dataset
 def download_dataset(dataset_url, dataset_path):
-    if not os.path.exists(dataset_path):
-        os.makedirs(dataset_path)
+    os.makedirs(dataset_path, exist_ok=True)
+    try:
         # Download the dataset using Kaggle API
-        subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_url, '-p', dataset_path])
+        subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_url, '-p', dataset_path], check=True)
         # Unzip the dataset
-        subprocess.run(['unzip', os.path.join(dataset_path, 'asl-alphabet.zip'), '-d', dataset_path])
-    else:
-        print("File exists.")
+        zip_path = os.path.join(dataset_path, 'asl-alphabet.zip')
+        subprocess.run(['unzip', zip_path, '-d', dataset_path], check=True)
 
-def image_to_dataloaders(train_path, batch_size=32):
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+
+def image_to_dataloaders(train_path, batch_size=64, num_workers=4):
     dataset = ImageFolder(train_path, transform=train_transform)
 
-    train_ratio = 0.8
+    train_ratio = 0.9
     train_size = int(train_ratio * len(dataset))
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
     # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     return train_loader, val_loader
 
